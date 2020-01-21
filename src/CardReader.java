@@ -4,103 +4,60 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.*;
+import java.nio.file.FileSystem;
 import java.util.*;
 
 public class CardReader {
 
     static  ArrayList<String> dbFiles;
+    static  ArrayList<String> dbFilesToRead;
 
     public static void main(String[] args) throws IOException {
+        if(args.length > 0) {
+            dbFiles = new ArrayList<>();
+            dbFilesToRead = new ArrayList<>();
+           // System.out.println(System.getProperty("user.dir") + File.separator + "dbCards");
+            final File folder = new File("dbCards");
+            listFilesForFolder(folder);
+         //   checkCard("t2.png");
+            final File folderToRead = new File(args[0]);
+            ParseFolder(folderToRead, args[0]);
+            ReadAllFiles();
+        }
+        else System.out.println("Please enter params");
 
-        dbFiles = new ArrayList<>();
-        final File folder = new File("dbCards");
-        listFilesForFolder(folder);
-        checkCard("t33.png");
-
-        //♣ Трефы — clubs
-        //♦ Бубны — diamonds
-        //♥️ Червы — hearts
-        //♠ Пики — spades
-//     //   System.out.println("Count card: " + getCountCard());
-//
-//        writeImage(150,595, 30, "test2.png", "test1.png");
-//
-//        System.out.println(getDifferenceCard("test.txt"));
-
-//        int[][] result = FileCardReader("test.txt");
-//        System.out.println("-----------PRINT-----------------");
-//        for (int[] number : result) {
-//            for (int number2 : number) {
-//                System.out.print(number2 + " ");
-//            }
-//            System.out.println(" -- ");
-//        }
+      //  System.out.println(args[0]);
 
 
+    }
 
-       // writeImage(150,600);
+    private static void ReadAllFiles() throws IOException {
+        for (String fileStr : dbFilesToRead)
+        {
+            checkCard(fileStr);
+        }
+    }
 
-       // writeImage(143,600, 1);   // begin card 1
-
-       // writeImage(215,600, 1);     //begin card 2
-
-      //  writeImage(286,600, 1);     //begin card 3
-
-//        writeImage(150,608, 1);     //1 card 29 29 29
-//        writeImage(230,608, 1);     //2 card 29 29 29
-//        writeImage(310,608, 1);     //3 card 29 29 29
-//        writeImage(380,608, 1);     //4 card 29 29 29
-//        writeImage(450,608, 1);     //5 card 29 29 29
-//        writeImage(520,608, 1);     //6 card 29 29 29
-//        File file = new File("E:\\Projects\\Java\\ImageCardReader\\imgs\\20180821_055341.782_0x26080126.png");
-//        File file = new File("smile.png");
-//        BufferedImage image = ImageIO.read(file);
-//
-//
-//        WritableRaster raster = image.getRaster();
-//        System.out.println("W: " + raster.getWidth());
-//        System.out.println("H: " + raster.getHeight());
-//        for(int i = 0; i < raster.getWidth(); i++)
-//        {
-//            int[] pixel = raster.getPixel(i,0,new int[4]);
-//            pixel[0] = 255;
-//            pixel[1] = 0;
-//            pixel[2] = 0;
-//            raster.setPixel(i,0,pixel);
-//        }
-//        int[] pixel = raster.getPixel(150,550,new int[4]);
-//        pixel[0] = 255;
-//        pixel[1] = 0;
-//        pixel[2] = 0;
-//        raster.setPixel(50,50,pixel);
-//        image.setData(raster);
-//        ImageIO.write(image,"png", new File("test1.png"));
-//        ImageIO.write(image, "png", new File("smile.png"));
-//
-//        String[] extension = ImageIO.getReaderFileSuffixes();
-//        for (String str : extension)
-//        {
-//            System.out.println(str);
-//        }
-//
-//        ImageReader reader = null;
-//        Iterator<ImageReader> iterator = ImageIO.getImageReadersByFormatName("png");
-//        if(iterator.has)
+    private static void ParseFolder(final File folder, String folderPath) {
+        for (final File fileEntry : Objects.requireNonNull(folder.listFiles())) {
+            if (fileEntry.isDirectory()) {
+                ParseFolder(fileEntry, folderPath);
+            } else {
+                dbFilesToRead.add(folderPath + File.separator + fileEntry.getName());
+            }
+        }
     }
 
     public static void checkCard(String cardImage) throws IOException {
-        //   System.out.println("Count card: " + getCountCard());
         int count = getCountCard(cardImage);
         int x = 150;
-        String info = cardImage;
+        String info = cardImage + " ";
         for(int i = 0; i < count; i++)
         {
             writeImage(x,595, 30, cardImage, "showCheck" + i + ".png", "txtFile" + i + ".txt");
-            info += " " + getDifferenceCard("txtFile" + i + ".txt");
-           // System.out.println("Check Card N" + (i+1) + ": " + getDifferenceCard("txtFile" + i + ".txt"));
+            info += getDifferenceCard("txtFile" + i + ".txt");
             x = x + 72;
         }
-
         System.out.println(info);
     }
 
@@ -110,7 +67,6 @@ public class CardReader {
                 listFilesForFolder(fileEntry);
             } else {
                 dbFiles.add(fileEntry.getName());
-//                System.out.println(fileEntry.getName());
             }
         }
     }
@@ -122,23 +78,15 @@ public class CardReader {
         for (String fileStr : dbFiles)
         {
             int[][] file = FileCardReader("dbCards\\" + fileStr);
-            //System.out.println("Check:  " + fileStr);
-//             if(ArEqual(result, file))
-//             {
-//                 diff = fileStr;
-//             }
             int ArEqualCard = ArEqualCard(result, file);
             if(smallDiff > ArEqualCard)
             {
                 smallDiff = ArEqualCard;
-                diff = fileStr + " diff: " + ArEqualCard(result, file) + " |";
+//                diff = fileStr + " " + ((100000 - ArEqualCard(result, file)) / 1000) + "% |";
+                diff = fileStr;
             }
-          //  diff += "| " + fileStr + " diff: " + ArEqualCard(result, file) + " |";
+
         }
-//        if(smallDiff != 200000)
-//        {
-//            return
-//        }
         return diff;
     }
 
@@ -159,11 +107,6 @@ public class CardReader {
                 }
                 fileArray[lineNum] = intArray;
                 lineNum++;
-//                System.out.println("Number of integers: " + intArray.length);
-//                System.out.println("The integers are:");
-//                for (int number : intArray) {
-//                    System.out.println(number);
-//                }
             }
             scanner.close();
         }
@@ -200,7 +143,6 @@ public class CardReader {
             for(int t = y; t < y+ h; t++)
             {
                 int[] pixel = raster.getPixel(i,t,new int[4]);
-//                System.out.println(pixel[0] + " " + pixel[1] + " " + pixel[2]);
                 fileStr +=  pixel[0] + "," + pixel[1] + "," + pixel[2] + "\n";
                 pixel[0] = 255;
                 pixel[1] = 0;
@@ -226,9 +168,7 @@ public class CardReader {
         BufferedWriter outputWriter = null;
         outputWriter = new BufferedWriter(new FileWriter(filename));
         for (int i = 0; i < x.length; i++) {
-            // Maybe:
             outputWriter.write(x[i]+"");
-            // Or:
             outputWriter.write(Integer.toString(x[i]));
             outputWriter.newLine();
         }
